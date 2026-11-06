@@ -1,0 +1,43 @@
+paf-ui
+Copyright 2026 Landon McLain
+
+The project's own code is licensed under the Apache License, Version 2.0
+(see LICENSE). This product bundles third-party code, vendored from upstream registries,
+which stays under its own license terms. Files changed from upstream carry a
+"Modified from" notice at the top: components/ai-elements/conversation.tsx,
+message.tsx, reasoning.tsx and components/ui/resizable.tsx.
+
+components/ui/ (18 files) — vendored from the shadcn/ui registry
+(https://github.com/shadcn-ui/ui): alert, button-group, button,
+collapsible, command, dialog, dropdown-menu, hover-card, input-group,
+input, popover, resizable, scroll-area, select, separator, spinner,
+textarea, tooltip.
+
+MIT License
+
+Copyright (c) 2023 shadcn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+components/ai-elements/ (8 files) — vendored from Vercel AI Elements
+(https://github.com/vercel/ai-elements): confirmation, conversation,
+message, prompt-input, reasoning, shimmer, sources, suggestion. Apache
+License, Version 2.0. Copyright 2023 Vercel, Inc.
+
+All npm dependencies listed in package.json remain under their own licenses.
