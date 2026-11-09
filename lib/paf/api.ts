@@ -27,6 +27,7 @@ export type Project = {
   slug: string;
   name: string;
   description: string;
+  root?: string;
   archived: boolean;
   created_at: string;
 };
@@ -156,12 +157,13 @@ export async function listProjects(): Promise<Project[]> {
 export async function createProject(
   name: string,
   description: string,
+  root?: string,
 ): Promise<{ ok: true; project: Project } | { ok: false; error: string }> {
   try {
     const res = await fetch(PAF_PROJECTS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, ...(root ? { root } : {}) }),
     });
     if (!res.ok) {
       const data = (await res.json().catch(() => ({}))) as { detail?: string };
@@ -173,22 +175,25 @@ export async function createProject(
   }
 }
 
-/** PATCH /api/projects/{slug} — edit name/description or (un)archive.
- *  Returns the updated project, or null on failure. Never throws. */
+/** PATCH /api/projects/{slug} — edit project fields or (un)archive.
+ *  An empty root clears it. Returns the updated project or an error. Never throws. */
 export async function updateProject(
   slug: string,
-  patch: Partial<Pick<Project, "name" | "description" | "archived">>,
-): Promise<Project | null> {
+  patch: Partial<Pick<Project, "name" | "description" | "archived" | "root">>,
+): Promise<{ ok: true; project: Project } | { ok: false; error: string }> {
   try {
     const res = await fetch(projectUrl(slug), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
     });
-    if (!res.ok) return null;
-    return (await res.json()) as Project;
-  } catch {
-    return null;
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { detail?: string };
+      return { ok: false, error: data.detail ?? `HTTP ${res.status}` };
+    }
+    return { ok: true, project: (await res.json()) as Project };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
