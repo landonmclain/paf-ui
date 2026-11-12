@@ -61,6 +61,7 @@ type Props = {
   onHide: (id: string, hidden: boolean) => void;
   /** Open the New project dialog; `assignTo` gets the new project on success. */
   onNewProject: (assignTo?: string) => void;
+  onEditProject: (project: Project) => void;
   /** Conversation-lane background processes (thread summarizer). */
   processes?: ProcessFrame[];
 };
@@ -137,6 +138,7 @@ export function ConversationList({
   onAssign,
   onHide,
   onNewProject,
+  onEditProject,
   processes = [],
 }: Props) {
   // conversation_id currently being renamed (inline input shown instead of title).
@@ -307,6 +309,7 @@ export function ConversationList({
                     g.key === UNASSIGNED && groups[0].key !== UNASSIGNED;
                   const isCollapsed =
                     (collapsed[g.key] ?? defaultCollapsed) && !hasActive;
+                  const editableProject = projects.find((p) => p.slug === g.project);
                   return (
                     <section key={g.key} className="mb-1">
                       <div className="group/section flex items-center gap-1 rounded-md px-1 py-1 text-[11px] font-medium text-muted-foreground hover:bg-accent/30">
@@ -331,6 +334,17 @@ export function ConversationList({
                             {g.items.length}
                           </span>
                         </button>
+                        {editableProject && (
+                          <button
+                            type="button"
+                            onClick={() => onEditProject(editableProject)}
+                            aria-label={`Edit project ${g.label}`}
+                            title={`Edit project ${g.label}`}
+                            className="rounded p-0.5 hover:bg-accent/60 hover:text-foreground md:opacity-0 md:focus-visible:opacity-100 md:group-hover/section:opacity-100"
+                          >
+                            <PencilIcon className="size-3" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => onCreate(g.project)}

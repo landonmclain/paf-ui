@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePanelRef } from "react-resizable-panels";
 import PafChat from "@/components/chat/PafChat";
 import { ConversationList } from "@/components/chat/ConversationList";
-import { NewProjectDialog } from "@/components/chat/NewProjectDialog";
+import { ProjectDialog } from "@/components/chat/ProjectDialog";
 import { ProcessesPanel } from "@/components/chat/ProcessesPanel";
 import { useIsMobile, useLayoutState } from "@/components/layout/LayoutState";
 import {
@@ -25,6 +25,7 @@ import {
   renameConversation,
   subscribeProcesses,
   updateConversation,
+  updateProject,
 } from "@/lib/paf";
 import type {
   Conversation,
@@ -100,10 +101,11 @@ export default function Home() {
   const [plan, setPlan] = useState<PlanItem[]>([]);
   // Projects are global (the user's), not per-agent — loaded once.
   const [projects, setProjects] = useState<Project[]>([]);
-  // New-project dialog; `assignTo` is a conversation to put in the new project.
-  const [newProject, setNewProject] = useState<{
+  // Shared project editor; `assignTo` optionally assigns a newly created project.
+  const [projectDialog, setProjectDialog] = useState<{
     open: boolean;
     assignTo?: string;
+    project?: Project;
   }>({
     open: false,
   });
@@ -358,14 +360,26 @@ export default function Home() {
     );
   };
 
-  const handleCreateProject = async (name: string, description: string) => {
-    const res = await createProject(name, description);
+  const handleSaveProject = async (
+    name: string,
+    description: string,
+    root: string,
+  ) => {
+    const res = projectDialog.project
+      ? await updateProject(projectDialog.project.slug, {
+          name,
+          description,
+          root,
+        })
+      : await createProject(name, description, root);
     if (!res.ok) return res.error;
     setProjects((prev) =>
-      [...prev, res.project].sort((a, b) => a.name.localeCompare(b.name)),
+      [...prev.filter((p) => p.slug !== res.project.slug), res.project].sort(
+        (a, b) => a.name.localeCompare(b.name),
+      ),
     );
-    if (newProject.assignTo) {
-      await patchConversation(newProject.assignTo, {
+    if (projectDialog.assignTo) {
+      await patchConversation(projectDialog.assignTo, {
         project: res.project.slug,
       });
     }
@@ -401,7 +415,8 @@ export default function Home() {
       onRename={handleRename}
       onAssign={(id, project) => void patchConversation(id, { project })}
       onHide={(id, hidden) => void patchConversation(id, { hidden })}
-      onNewProject={(assignTo) => setNewProject({ open: true, assignTo })}
+      onNewProject={(assignTo) => setProjectDialog({ open: true, assignTo })}
+      onEditProject={(project) => setProjectDialog({ open: true, project })}
       processes={conversationProcesses}
     />
   );
@@ -485,10 +500,14 @@ export default function Home() {
         </div>
       )}
       {/* Outside the Group: only Panels/Separators may be its children. */}
-      <NewProjectDialog
-        open={newProject.open}
-        onOpenChange={(open) => setNewProject((prev) => ({ ...prev, open }))}
-        onCreate={handleCreateProject}
+      <ProjectDialog
+        key={projectDialog.project ? `edit:${projectDialog.project.slug}` : "new"}
+        project={projectDialog.project}
+        open={projectDialog.open}
+        onOpenChange={(open) => {
+          if (!open) setProjectDialog({ open: false });
+        }}
+        onSave={handleSaveProject}
       />
     </div>
   );
